@@ -6,6 +6,13 @@ body{
     padding:10px;
     margin:0;
     overflow-x: scroll;
+
+}
+:root{
+    --btn-background:#0000008b;
+}
+::-webkit-scrollbar{
+    width:10px;
 }
 *{
     box-sizing: border-box;
@@ -16,6 +23,16 @@ h3{
     color: orangered;
     margin-bottom: 10px;
     text-align: center;
+}
+.first-page,.second-page{
+    height:calc(100vh - 20px);
+
+    display:grid;
+    grid-template-rows:1fr 10fr 1fr;
+}
+.second-page{
+    display:none;
+
 }
 textarea{
     width:100%;
@@ -31,10 +48,11 @@ textarea{
 }
 .buttons{
     text-align: center;
+    background:white;
 }
 .buttons button{
     border:none;
-    background:#000000a3;
+    background:var(--btn-background);
     padding:7px 20px;
     color:white;
     border-radius:10px;
@@ -44,23 +62,33 @@ textarea{
 }
 .buttons button:hover{
     background:rgb(176, 172, 172);
-    color:#000000a3;
+    color:var(--btn-background);
+}
+.cards{
+    height:400px;
+    overflow-y:scroll;
 }
 .card{
     background:#ffffffa3;
     border-radius:7px;
-    padding:5px;
+    margin-bottom:5px;
 }
 .card .card-body{
     text-align: justify;
-    background: red;
-    padding:5px;
+    background: rgb(218, 216, 216);
+    padding:10px;
+    border-radius: 0 0 10px 10px;
+    word-wrap: break-word;
 }
 .card .card-title{
+    word-wrap: break-word;
     text-align: center;
-    padding:5px;
-    background:#00000033;
+    padding:5px 10px;
+    background:#000000a3;
     color:white;
+    border-radius:10px 10px 0 0;
+    display: flex;
+    justify-content: space-between;
 }
 .card .card-title button{
     border:none;
