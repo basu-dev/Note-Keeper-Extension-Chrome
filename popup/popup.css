@@ -1,7 +1,11 @@
 body{
     height:500px;
     width:500px;
-
+    /* font-size:22px; */
+    overflow: scroll;
+    padding:10px;
+    margin:0;
+    overflow-x: scroll;
 }
 *{
     box-sizing: border-box;
@@ -28,7 +32,7 @@ textarea{
 .buttons{
     text-align: center;
 }
-button{
+.buttons button{
     border:none;
     background:#000000a3;
     padding:7px 20px;
@@ -38,8 +42,29 @@ button{
     outline:none;
     transition:.3s;
 }
-button:hover{
+.buttons button:hover{
     background:rgb(176, 172, 172);
     color:#000000a3;
+}
+.card{
+    background:#ffffffa3;
+    border-radius:7px;
+    padding:5px;
+}
+.card .card-body{
+    text-align: justify;
+    background: red;
+    padding:5px;
+}
+.card .card-title{
+    text-align: center;
+    padding:5px;
+    background:#00000033;
+    color:white;
+}
+.card .card-title button{
+    border:none;
+    background:white;
+    color:black;
 }
 
