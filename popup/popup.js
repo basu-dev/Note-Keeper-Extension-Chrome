@@ -1,38 +1,55 @@
-let d = document;
+"use strict";
+const d = document;
+const htmlParser = new DOMParser();
 let notes = [];
-let firstPage, secondPage, firstPageCloseBtn, secondPageCloseBtn;
+let firstPage,
+  secondPage,
+  firstPageCloseBtn,
+  secondPageCloseBtn,
+  backupBtn,
+  textarea,
+  noteCards,
+  key;
 d.addEventListener("DOMContentLoaded", () => {
+  /*Initialize Variables*/
   firstPage = d.querySelector(".first-page");
   secondPage = d.querySelector(".second-page");
   firstPageCloseBtn = d.querySelector("#open-notes");
   secondPageCloseBtn = d.querySelector("#second-page-close");
+  backupBtn = d.querySelector("#backup");
+  textarea = d.querySelector("textarea");
+  noteCards = d.querySelector(".cards");
+  /*Adding Event Listners*/
+  backupBtn.addEventListener("click", (_) => backupNotes());
   firstPageCloseBtn.addEventListener("click", (_) => showFirstPage(false));
   secondPageCloseBtn.addEventListener("click", (_) => showFirstPage(true));
-  let textarea = d.querySelector("textarea");
-  let key = "";
+  textarea.addEventListener("keyup", (e) => saveNote(e.target.value));
+  /*Tasks Running As Soon As content is loaded*/
+  fillTextarea();
+});
+const saveNote = (string) => {
+    if(string.trim() == ''){
+        deleteNote(key);
+    }
+  let data = {};
+  data[key] = string;
+  chrome.storage.sync.set(data, (res) => {
+    console.log(res);
+  });
+};
+const fillTextarea = () => {
   chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
-    key = "Notes " + getUrlOrigin(tabs[0].url);
+    key = "Notes " + new URL(tabs[0].url).origin;
     chrome.storage.sync.get(key, (data) => {
       if (data[key]) {
         textarea.value = data[key];
       }
     });
   });
-  textarea.addEventListener("keyup", (e) => {
-    let data = {};
-    data[key] = e.target.value;
-    chrome.storage.sync.set(data, (res) => {
-      console.log(res);
-    });
-  });
-});
-const getUrlOrigin = (string) => {
-  let url = new URL(string);
-  return url.origin;
 };
 const getNotes = () => {
-  notes = [];
   chrome.storage.sync.get(null, (data) => {
+      notes=[];
     Object.keys(data).forEach((key) => {
       let note = {
         url: /Notes (.+)/.exec(key)[1],
@@ -52,13 +69,11 @@ const deleteAllNotes = (_) => {
 const deleteNote = (key) => {
   if (/^Notes .+$/.test(key)) {
     chrome.storage.sync.remove(key, (data) => {
-      console.log("deleting", data);
+      console.log("deleting", key);
     });
   }
 };
-const htmlParser = new DOMParser();
 const showNotes = (notes) => {
-  let noteCards = d.querySelector(".cards");
   noteCards.innerHTML = "";
   for (let i = 0; i < notes.length; i++) {
     let note = notes[i];
@@ -87,4 +102,20 @@ const showFirstPage = (truth) => {
     firstPage.style.display = "none";
     secondPage.style.display = "grid";
   }
+};
+const backupNotes = () => {
+  let a = d.createElement("a");
+  let dt = new Date();
+  a.setAttribute(
+    "download",
+    `NotesBackup-${dt.getFullYear()}-${dt.getMonth()}-${dt.getDate()}-${dt.getHours()}-${dt.getMinutes()}.json`
+  );
+  a.href = `data:text/json;charset=utf-8,${encodeURIComponent(
+    JSON.stringify(notes)
+  )}`;
+  a.style.display = "none";
+  d.body.append(a);
+  console.log(a);
+  a.click();
+  d.querySelector("[download]").remove();
 };
