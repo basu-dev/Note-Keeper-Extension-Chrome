@@ -8,34 +8,45 @@ let firstPage,
   secondPageCloseBtn,
   backupBtn,
   textarea,
+  restoreBtn,
   noteCards,
   deleteAllBtn,
   input,
   fileInput,
+  closeFileInputBtn,
   key;
-d.addEventListener("DOMContentLoaded", () => {
+/*generic functions*/
+const select = (sel) => d.querySelector(sel);
+const add = (element, eventtype, cb) => element.addEventListener(eventtype, cb);
+const css = (element, style) =>
+  Object.keys(style).forEach((key) => (element.style[key] = style[key]));
+
+add(d, "DOMContentLoaded", () => {
   /*Initialize Variables*/
-  firstPage = d.querySelector(".first-page");
-  secondPage = d.querySelector(".second-page");
-  firstPageCloseBtn = d.querySelector("#open-notes");
-  secondPageCloseBtn = d.querySelector("#second-page-close");
-  backupBtn = d.querySelector("#backup");
-  deleteAllBtn = d.querySelector("#delete-all");
-  textarea = d.querySelector("textarea");
-  input = d.querySelector("input");
-  noteCards = d.querySelector(".cards");
-  fileInput = d.querySelector("input[type=file]");
+  firstPage = select(".first-page");
+  secondPage = select(".second-page");
+  firstPageCloseBtn = select("#open-notes");
+  secondPageCloseBtn = select("#second-page-close");
+  backupBtn = select("#backup");
+  deleteAllBtn = select("#delete-all");
+  textarea = select("textarea");
+  input = select("input");
+  noteCards = select(".cards");
+  restoreBtn = select("#restore");
+  fileInput = select("input[type=file]");
+  closeFileInputBtn = select("#close-file-input");
   /*Adding Event Listners*/
-  firstPageCloseBtn.addEventListener("click", (_) => showFirstPage(false));
-  secondPageCloseBtn.addEventListener("click", (_) => showFirstPage(true));
-  textarea.addEventListener("keyup", (e) => saveNote(e.target.value, "body"));
-  textarea.addEventListener("paste", (e) => saveNote(e.target.value, "body"));
-  input.addEventListener("keyup", (e) => saveNote(e.target.value, "title"));
-  backupBtn.addEventListener("click", (_) => backupNotes());
-  deleteAllBtn.addEventListener("click", (_) => deleteAllNotes());
-  fileInput.addEventListener("change", (e) => getBackupFromFile(e));
+  add(firstPageCloseBtn, "click", (_) => showFirstPage(false));
+  add(secondPageCloseBtn, "click", (_) => showFirstPage(true));
+  add(textarea, "keyup", (e) => saveNote(e.target.value, "body"));
+  add(textarea, "paste", (e) => saveNote(e.target.value, "body"));
+  add(input, "keyup", (e) => saveNote(e.target.value, "title"));
+  add(backupBtn, "click", (_) => backupNotes());
+  add(restoreBtn, "click", (_) => (fileInput.style.display = "block"));
+  add(closeFileInputBtn, "click", (_) => (fileInput.style.display = "none"));
+  add(deleteAllBtn, "click", (_) => deleteAllNotes());
+  add(fileInput, "change", (e) => getBackupFromFile(e));
   /*Tasks Running As Soon As content is loaded*/
-  // fillTextarea();
   showFirstPage(false);
 });
 const showFirstPage = (truth) => {
@@ -60,7 +71,7 @@ const saveNote = async (body, which) => {
   if (data[key]) {
     data[key] = { ...data[key], [which]: body };
   } else {
-    data[key] = {title: "",body: ""};
+    data[key] = { title: "", body: "" };
     data[key][which] = body;
   }
   chrome.storage.sync.set(data, (res) => {
@@ -155,33 +166,29 @@ const backupNotes = () => {
   d.body.append(a);
   console.log(a);
   a.click();
-  d.querySelector("[download]").remove();
+  select("[download]").remove();
 };
 const reader = new FileReader();
 const getBackupFromFile = (e) => {
   let file = e.target.files[0];
-  console.log(file.name);
   if (
     file.type == "application/json" &&
     /^NotesBackup-[0-9]+-[0-9]+-[0-9]+-[0-9]+-[0-9]+-[0-9]+.json$/.test(
       e.target.files[0].name
     )
   ) {
-    console.log("valid file name");
     reader.readAsText(file, "UTF-8");
     reader.onloadend = (e) => {
       console.log(e.target.result);
-      let isValid=true;
-      ["url","title","body"].forEach(x=>{
-        if(!e.target.result.includes(x)){
-          isValid=false;
+      let isValid = true;
+      ["url", "title", "body"].forEach((x) => {
+        if (!e.target.result.includes(x)) {
+          isValid = false;
         }
-      }
-        );
-      if(isValid){
-        console.log("valid");
+      });
+      if (isValid) {
         notes = JSON.parse(e.target.result);
-        if(notes[0].url && notes[0].body && notes[0].title){
+        if (notes[0].url && notes[0].body && notes[0].title) {
           notes.forEach((note) => {
             const { url, body, title } = note;
             let data = {};

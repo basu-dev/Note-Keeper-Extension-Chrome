@@ -107,4 +107,7 @@ textarea{
     text-align: center;
     background: #00000044;
 }
+input[type=file]{
+    display:none;
+}
 
