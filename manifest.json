@@ -7,7 +7,6 @@
         "default_popup":"popup/popup.html"
     },
     "background":{
-        
             "scripts":["background.js"],
             "persistance":false
     },

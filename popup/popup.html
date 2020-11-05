@@ -12,7 +12,10 @@
 <body>
     <div class="first-page">
         <h3>Keep Your Note</h3>
-        <textarea placeholder="Write Your Note" autofocus></textarea>
+        <div>
+        <input placeholder="Subject" autofocus>
+        <textarea placeholder="Write Your Note"></textarea>
+        </div>
         <div class="buttons">
             <button id="delete">Delete Note</button>
             <button id="open-notes">Open All Notes</button>
@@ -22,8 +25,10 @@
         <h3>Your Notes</h3>
         <div class="cards"></div>
         <div class="buttons">
+            <button id="delete-all">Delete All</button>
             <button id="backup">Backup Notes</button>
-            <button id="second-page-close">Back</button>
+            <button id="second-page-close">Write Note</button>
+            <input type="file" placeholder="Select File">
         </div>
     </div>
 </body>
