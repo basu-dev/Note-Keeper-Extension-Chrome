@@ -14,6 +14,8 @@ let firstPage,
   input,
   fileInput,
   closeFileInputBtn,
+  count,
+  searchBox,
   key;
 /*generic functions*/
 const select = (sel) => d.querySelector(sel);
@@ -35,6 +37,10 @@ add(d, "DOMContentLoaded", () => {
   restoreBtn = select("#restore");
   fileInput = select("input[type=file]");
   closeFileInputBtn = select("#close-file-input");
+  buttonsDiv = select(".sec-page-btns");
+  fileInputDiv = select("#file-input");
+  searchBox = select("#search");
+  
   /*Adding Event Listners*/
   add(firstPageCloseBtn, "click", (_) => showFirstPage(false));
   add(secondPageCloseBtn, "click", (_) => showFirstPage(true));
@@ -42,20 +48,31 @@ add(d, "DOMContentLoaded", () => {
   add(textarea, "paste", (e) => saveNote(e.target.value, "body"));
   add(input, "keyup", (e) => saveNote(e.target.value, "title"));
   add(backupBtn, "click", (_) => backupNotes());
-  add(restoreBtn, "click", (_) => (fileInput.style.display = "block"));
-  add(closeFileInputBtn, "click", (_) => (fileInput.style.display = "none"));
+  add(restoreBtn, "click", (_) =>showFileInputDiv(true) );
+  add(closeFileInputBtn, "click", (_) => showFileInputDiv(false));
   add(deleteAllBtn, "click", (_) => deleteAllNotes());
   add(fileInput, "change", (e) => getBackupFromFile(e));
+  add(searchBox,"keyup",(e)=>search(e.target.value));
   /*Tasks Running As Soon As content is loaded*/
   showFirstPage(false);
 });
+const showFileInputDiv=(truth)=>{
+  if(truth){
+    css(fileInputDiv,{display:"block"});
+    css(buttonsDiv,{display:"none"});
+    return;
+  }
+  css(fileInputDiv,{display:"none"});
+  fileInput.value="";
+  css(buttonsDiv,{display:"block"});
+}
 const showFirstPage = (truth) => {
   if (truth) {
     fillTextarea();
     firstPage.style.display = "grid";
     secondPage.style.display = "none";
   } else {
-    let notes = getNotes();
+    notes = getNotes();
     showNotes(notes);
     firstPage.style.display = "none";
     secondPage.style.display = "grid";
@@ -98,23 +115,42 @@ const fillTextarea = () => {
   });
 };
 const getNotes = () => {
+  const countArea = select("h3 small");
   chrome.storage.sync.get(null, (data) => {
+    count=0;
     console.log(data);
     notes = [];
     Object.keys(data).forEach((key) => {
       if (/Notes (.)+/.test(key)) {
+        count++;
         let note = {
           url: /Notes (.+)/.exec(key)[1],
           title: data[key].title,
           body: data[key].body,
         };
         notes.push(note);
+        countArea.innerText = count;
       }
     });
     showNotes(notes);
+    fillTextarea();
   });
   return notes;
 };
+const search=(word)=>{
+  let reg=new RegExp(word,"i");
+  tempNotes=[];
+  if(word.trim()!= ""){
+    notes.forEach(({url,title,body})=>{
+      if(reg.test(url) || reg.test(title) || reg.test(body)){
+        tempNotes.push({url,title,body});
+      }
+    });
+    showNotes(tempNotes);
+  }else{ 
+    showNotes(notes);
+  }
+}
 const deleteNote = (key) => {
   if (/^Notes .+$/.test(key)) {
     chrome.storage.sync.remove(key, (_) => getNotes());
@@ -176,6 +212,7 @@ const getBackupFromFile = (e) => {
     /^NotesBackup-[0-9]+-[0-9]+-[0-9]+-[0-9]+-[0-9]+-[0-9]+.json$/.test(
       e.target.files[0].name
     )
+
   ) {
     reader.readAsText(file, "UTF-8");
     reader.onloadend = (e) => {
@@ -187,6 +224,7 @@ const getBackupFromFile = (e) => {
         }
       });
       if (isValid) {
+        if(confirm("Are you sure you want to use this backup?")){
         notes = JSON.parse(e.target.result);
         if (notes[0].url && notes[0].body && notes[0].title) {
           notes.forEach((note) => {
@@ -195,7 +233,10 @@ const getBackupFromFile = (e) => {
             data[`Notes ${url}`] = { title, body };
             chrome.storage.sync.set(data);
           });
+          showFileInputDiv(false);
           getNotes();
+
+        }
         }
       }
     };

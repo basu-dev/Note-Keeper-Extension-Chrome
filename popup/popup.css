@@ -1,11 +1,12 @@
 body{
-    height:500px;
+    height:600px;
     width:500px;
     /* font-size:22px; */
     overflow: scroll;
     padding:0;
     margin:0;
     overflow-x: scroll;
+    background: #259dd5;
 
 }
 :root{
@@ -16,13 +17,25 @@ body{
 }
 *{
     box-sizing: border-box;
+    margin:0;
     font-family: Verdana, Geneva, Tahoma, sans-serif;
 }
 h3{
-    font-size: 1.5rem;
-    color: orangered;
-    margin-bottom: 10px;
+    font-size: 1.2rem;
+    border-bottom:1px solid white;
+    color: white;
+    letter-spacing: 1px;
+    margin:0 0 10px 0;
+    padding:5px 0 5px 0;
     text-align: center;
+}
+h3 small{
+    margin: 10px;
+    /* margin-top: -5px; */
+    padding: 3px 7px;
+    border-radius: 50%;
+    font-size: .7rem;
+    background: #0000004d;
 }
 .first-page,.second-page{
     padding:10px;
@@ -38,25 +51,33 @@ input,textarea{
     width:100%;
     border-radius: 10px;
     border:none;
-    background:#d8d6d6;
+    background:#d8d6d6b4;
     font-size: 1.1rem;
     outline:none;
     resize: none;
     padding:10px;
     color:#000000cc;
 }
+input[id=search]{
+    border-radius: 20px;
+    margin:5px 0;
+    padding:7px 20px;
+}
 textarea{
     height:80%;
     margin-top: 10px;
 }
+.info{
+    color:white;
+    text-align: center;
+}
 .buttons{
     text-align: center;
-    background:white;
     margin-top:10px;
 }
 .buttons button{
     user-select:none;
-    border:none;
+    border:1px solid transparent;
     background:var(--btn-background);
     padding:7px 20px;
     color:white;
@@ -66,8 +87,13 @@ textarea{
     transition:.3s;
 }
 .buttons button:hover{
-    background:rgb(176, 172, 172);
-    color:var(--btn-background);
+    background:rgb(209, 207, 207);
+    color:black;
+}
+button[id=delete-all]:hover{
+    background:rgb(233, 17, 17);
+    border:1px solid white;
+    color:white;
 }
 .cards{
     height:100%;
@@ -75,7 +101,7 @@ textarea{
 }
 .card{
     background:#ffffffa3;
-    border-radius:7px;
+    border-radius:10px;
     margin-bottom:5px;
 }
 .card .card-body{
@@ -98,8 +124,16 @@ textarea{
 }
 .card .card-header button{
     border:none;
-    background:white;
+    background:#ffffffaa;
     color:black;
+    border-radius: 20px;
+    cursor: pointer;
+    transition:.3s;
+    padding-bottom:.13rem;
+}
+.card-header button:hover{
+    background: #e91616;
+    color:white;
 }
 .card .card-title{
     padding:2px;
@@ -107,7 +141,7 @@ textarea{
     text-align: center;
     background: #00000044;
 }
-input[type=file]{
+#file-input{
     display:none;
 }
 
