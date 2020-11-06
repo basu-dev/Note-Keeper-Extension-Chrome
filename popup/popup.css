@@ -35,6 +35,7 @@ h3 small{
     padding: 3px 7px;
     border-radius: 50%;
     font-size: .7rem;
+    font-weight: 400;
     background: #0000004d;
 }
 .first-page,.second-page{
@@ -106,7 +107,7 @@ button[id=delete-all]:hover{
 }
 .card .card-body{
     text-align: justify;
-    background: rgb(218, 216, 216);
+    background: rgb(243, 242, 242);
     padding:10px;
     border-radius: 0 0 10px 10px;
     word-wrap: break-word;
