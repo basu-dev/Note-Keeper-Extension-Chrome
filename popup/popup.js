@@ -21,14 +21,7 @@ let firstPage,
 const select = (sel) => d.querySelector(sel);
 const add = (element, eventtype, cb) => element.addEventListener(eventtype, cb);
 const css = (element, style) =>
-  Object.keys(style).forEach((key) => (element.style[key] = style[key]));
-const randomId = (_) => {
-  let id = "";
-  for (let i = 0; i < 12; i++) {
-    id = id.concat(Math.round(Math.random() * 9).toString());
-  }
-  return id;
-};
+  Object.keys(style).forEach((key) => (element.style[key] = style[key]))
 
 add(d, "DOMContentLoaded", () => {
   /*Initialize Variables*/
@@ -88,8 +81,7 @@ const showFirstPage = (truth) => {
     firstPage.style.display = "grid";
     secondPage.style.display = "none";
   } else {
-    notes = getNotes();
-    showNotes(notes);
+    loadNotes();
     firstPage.style.display = "none";
     secondPage.style.display = "grid";
   }
@@ -99,7 +91,7 @@ const saveNote = async () => {
   let title = input.value;
   let id = textarea.getAttribute('note-id');
   if(id.trim()==""){
-    id=randomId();
+    id=Date.now();
     textarea.setAttribute('note-id',id);
   }
   console.log(id);
@@ -111,7 +103,7 @@ const saveNote = async () => {
   let data = (await getNote(key)) ? await getNote(key) : {};
   data[key]={title,body,url};
   chrome.storage.sync.set(data, (res) => {
-    console.log(`saving ${JSON.stringify(data[key])}`);
+    undefined
   });
 };
 const getNote = (key) => {
@@ -121,47 +113,41 @@ const getNote = (key) => {
     });
   });
 };
-const fillTextarea = (id) => {
-  let key = `Notes ${id}`;
-    chrome.storage.sync.get(key, (data) => {
-      console.log(data);
-      if (data[key]) {
-        textarea.value = data[key].body;
-        textarea.setAttribute('note-id',id);
-        input.value = data[key].title;
-      }
-    });
-  
+const fillTextarea = async (id) => {
+  let { body, title } = notes.filter((n) => n.id == id)[0];
+  textarea.value = body;
+  textarea.setAttribute("note-id", id);
+  input.value = title;
 };
+const loadNotes = async ()=>showNotes(await getNotes())
 const getNotes = () => {
-  count = 0;
-  chrome.storage.sync.get(null, (data) => {
-    console.log(data);
-    notes = [];
-    Object.keys(data).forEach((key) => {
-      if (/Notes (.)+/.test(key)) {
-        count++;
-        let note = {
-          id: /Notes (.+)/.exec(key)[1],
-          url: data[key].url,
-          title: data[key].title,
-          body: data[key].body,
-        };
-        notes.push(note);
-      }
+  return new Promise((resolve)=>{
+    count = 0;
+    chrome.storage.sync.get(null, (data) => {
+      notes = [];
+      Object.keys(data).forEach((key) => {
+        if (/Notes (.)+/.test(key)) {
+          count++;
+          let note = {
+            id: /Notes (.+)/.exec(key)[1],
+            url: data[key].url,
+            title: data[key].title,
+            body: data[key].body,
+          };
+          notes.unshift(note);
+        }
+      });
+      resolve(notes);
     });
-    showNotes(notes);
-    // fillTextarea();
-  });
-  return notes;
+  })
 };
 const search = (word) => {
   let reg = new RegExp(word, "i");
   tempNotes = [];
   if (word.trim() != "") {
-    notes.forEach(({ url, title, body }) => {
+    notes.forEach(({ id,url, title, body }) => {
       if (reg.test(url) || reg.test(title) || reg.test(body)) {
-        tempNotes.push({ url, title, body });
+        tempNotes.push({ id,url, title, body });
       }
     });
     showNotes(tempNotes);
@@ -171,14 +157,16 @@ const search = (word) => {
 };
 const deleteNote = (key) => {
   if (/^Notes .+$/.test(key)) {
-    chrome.storage.sync.remove(key, (_) => getNotes());
+    chrome.storage.sync.remove(key, (_) => {loadNotes();
+    notifier("Note Deleted Successfully!")
+    });
   }
 };
 const deleteAllNotes = (_) => {
   if (confirm("Do You Want To Delete All Notes?")) {
     chrome.storage.sync.get(null, (data) => {
       Object.keys(data).forEach((key) => deleteNote(key));
-      getNotes();
+      loadNotes();
     });
   }
 };
@@ -192,7 +180,7 @@ const showNotes = (notes) => {
       .parseFromString(
         /*html*/ `
               <div class="card">
-                  <div class="card-header">${note.url}<span><button note-id="${note.id}">Edit</button> <button id="${note.id}">Del</button></span></div>
+                  <div class="card-header"><a href="${note.url}">${note.url}</a><span><small></small><button note-id="${note.id}">Edit</button> <button id="${note.id}">Del</button></span></div>
                   <div class="card-title">${note.title}</div>
                   <pre class="card-body">${note.body}</pre>
               </div>
@@ -204,14 +192,37 @@ const showNotes = (notes) => {
       if (confirm("Do you want to delete  this note?")) {
         deleteNote(`Notes ${e.target.id}`);
       }
+      
     });
     html.querySelector("button[note-id]").addEventListener("click", (e) => {
        fillTextarea(e.target.getAttribute('note-id'));
        showFirstPage(true);
     });
+    let time = getAppropriateTime(parseInt(note.id));
+    html.querySelector('small').innerText=time;
+    // console.log(time);
+    const timeSection=html.querySelector('div');
     noteCards.appendChild(html);
   }
 };
+const getAppropriateTime=(time)=>{
+  const date = new Date(time);
+  const diff = Date.now() - time;
+  const DAY = 86400000;
+  if(diff < DAY && diff> 0) return /([\d]+:[\d]+)/.exec(date.toTimeString())[0]
+  else if(diff < 7*DAY){
+    const [,day,time]=/([\D]+) \D+ .+ (\d+:\d+)/.exec(date)
+    return `${day}, ${time}`;
+  }
+  else if(diff < 364*DAY){
+    const [,day,month]=/([\D]+) ([\D]+ [\d]+)/.exec(date);
+    return `${day}, ${month}`
+  }
+  else {
+    const [,month,year]=/[\D]+ ([\D]+ [\d]+) ([\d]+)/.exec(date);
+    return `${month}, ${year}`
+  }
+}
 const backupNotes = () => {
   let a = d.createElement("a");
   let dt = new Date();
@@ -228,12 +239,27 @@ const backupNotes = () => {
   a.click();
   select("[download]").remove();
 };
+let notTimeout;
+const notifier=(msg,type)=>{
+  const notif = select('.notifier');
+  notif.innerText=msg;
+  const className='notifier-shown';
+  let colorClass='a'
+  if(type && type=='danger') colorClass='notifier-danger'
+  else if(type && type == 'warn') colorClass='notifier-warn'
+  notif.classList.add(colorClass);
+  notif.classList.add(className);
+  notTimeout=setTimeout(_=>{
+    notif.classList.remove(className);
+    setTimeout(_=>notif.classList.remove(colorClass));
+  },3000)
+}
 const reader = new FileReader();
 const getBackupFromFile = (e) => {
   let file = e.target.files[0];
   if (
     file.type == "application/json" &&
-    /^NotesBackup-[0-9]+-[0-9]+-[0-9]+-[0-9]+-[0-9]+-[0-9]+.json$/.test(
+    /^NotesBackup-[\d]+-[\d]+-[\d]+-[\d]+-[\d]+-[\d]+.json$/.test(
       e.target.files[0].name
     )
   ) {
@@ -243,24 +269,31 @@ const getBackupFromFile = (e) => {
       let isValid = true;
       ["url", "title", "body"].forEach((x) => {
         if (!e.target.result.includes(x)) {
-          isValid = false;
+          isValid =true;
         }
       });
       if (isValid) {
         if (confirm("Are you sure you want to use this backup?")) {
           notes = JSON.parse(e.target.result);
-          if (notes[0].url && notes[0].body && notes[0].title) {
+          if (notes[0].url && notes[0].body && notes[0].title &&notes[0].id) {
             notes.forEach((note) => {
               const { id,url, body, title } = note;
               let data = {};
               data[`Notes ${id}`] = {url, title, body };
               chrome.storage.sync.set(data);
+              notifier("Notes Restored Successfully!")
             });
             showFileInputDiv(false);
-            getNotes();
+            loadNotes();
+          }else{
+            notifier("Invalid File",'warn');
           }
         }
+      }else{
+        notifier("Invalid File",'warn');
       }
     };
+  }else{
+    notifier("Invalid File",'warn');
   }
 };

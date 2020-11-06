@@ -52,17 +52,20 @@ input,textarea{
     width:100%;
     border-radius: 10px;
     border:none;
-    background:#d8d6d6b4;
+    background:#2f2d2d52;
     font-size: 1.1rem;
     outline:none;
     resize: none;
     padding:10px;
-    color:#000000cc;
+    color:white;
 }
 input[id=search]{
     border-radius: 20px;
     margin:5px 0;
     padding:7px 20px;
+}
+input::placeholder , textarea::placeholder{
+    color:rgb(233, 231, 231);
 }
 textarea{
     height:80%;
@@ -123,6 +126,9 @@ button[id=delete-all]:hover{
     display: flex;
     justify-content: space-between;
 }
+.card-header a{
+    color:inherit;
+}
 .card .card-header button{
     border:none;
     background:#ffffffaa;
@@ -136,6 +142,10 @@ button[id=delete-all]:hover{
     background: #e91616;
     color:white;
 }
+.card-header small{
+    margin: .3rem 1rem 0 0;
+
+}
 .card .card-title{
     padding:2px;
     font-size:1.03rem;
@@ -144,5 +154,25 @@ button[id=delete-all]:hover{
 }
 #file-input{
     display:none;
+}
+.notifier{
+    padding:5px 20px;
+    background:#0fce0f;
+    color:white;
+    position:fixed;
+    bottom:50px;
+    right:-100%;
+    font-size:1.03rem;
+    border-radius:10px;
+    transition: right .3s ease-in-out;
+}
+.notifier-warn{
+    background:#d5ad0f !important;
+}
+.notifier-danger{
+    background: #e91616 !important;
+}
+.notifier-shown{
+    right:20px;
 }
 
