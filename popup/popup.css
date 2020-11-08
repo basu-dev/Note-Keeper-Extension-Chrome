@@ -99,6 +99,9 @@ button[id=delete-all]:hover{
     border:1px solid white;
     color:white;
 }
+button img{
+    margin-bottom:-5px;
+}
 .cards{
     height:100%;
     overflow-y:scroll;
@@ -143,7 +146,7 @@ button[id=delete-all]:hover{
     color:white;
 }
 .card-header small{
-    margin: .3rem 1rem 0 0;
+    margin: .27rem 1rem 0 0;
 
 }
 .card .card-title{

@@ -180,7 +180,7 @@ const showNotes = (notes) => {
       .parseFromString(
         /*html*/ `
               <div class="card">
-                  <div class="card-header"><a href="${note.url}">${note.url}</a><span><small></small><button note-id="${note.id}">Edit</button> <button id="${note.id}">Del</button></span></div>
+                  <div class="card-header"><a href="${note.url}">${note.url}</a><span><small></small><button note-id="${note.id}">Edit</button> <button id="${note.id}"><img src="../assets/delete.svg"></button></span></div>
                   <div class="card-title">${note.title}</div>
                   <pre class="card-body">${note.body}</pre>
               </div>
