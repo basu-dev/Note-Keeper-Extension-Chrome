@@ -1,4 +1,6 @@
-const d = document;
+(function(d){
+  
+
 ("use strict");
 const htmlParser = new DOMParser();
 let notes = [];
@@ -16,6 +18,7 @@ let firstPage,
   closeFileInputBtn,
   count,
   searchBox,
+  newNoteBtn,
   url;
 /*generic functions*/
 const select = (sel) => d.querySelector(sel);
@@ -40,6 +43,7 @@ add(d, "DOMContentLoaded", () => {
   buttonsDiv = select(".sec-page-btns");
   fileInputDiv = select("#file-input");
   searchBox = select("#search");
+  newNoteBtn = select(".top-right");
   chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
     url = new URL(tabs[0].url).origin;
   });
@@ -47,6 +51,7 @@ add(d, "DOMContentLoaded", () => {
   /*Adding Event Listners*/
   add(firstPageCloseBtn, "click", (_) => showFirstPage(false));
   add(secondPageCloseBtn, "click", (_) => newNote());
+  add(newNoteBtn, "click", (_) => newNote());
   add(textarea, "keyup", (e) => saveNote());
   add(textarea, "paste", (e) => saveNote());
   add(input, "keyup", (e) => saveNote());
@@ -180,7 +185,7 @@ const showNotes = (notes) => {
       .parseFromString(
         /*html*/ `
               <div class="card">
-                  <div class="card-header"><a href="${note.url}">${note.url}</a><span><small></small><button note-id="${note.id}">Edit</button> <button id="${note.id}"><img src="../assets/delete.svg"></button></span></div>
+                  <div class="card-header"><a href="${note.url}">${note.url}</a><span><small></small><button note-id="${note.id}">Edit</button> <button id="${note.id}"><img src="../assets/delete.svg" ></button></span></div>
                   <div class="card-title">${note.title}</div>
                   <pre class="card-body">${note.body}</pre>
               </div>
@@ -267,15 +272,17 @@ const getBackupFromFile = (e) => {
     reader.onloadend = (e) => {
       console.log(e.target.result);
       let isValid = true;
-      ["url", "title", "body"].forEach((x) => {
+      ["url", "title", "body","id"].forEach((x) => {
         if (!e.target.result.includes(x)) {
-          isValid =true;
+          isValid =false;
         }
       });
       if (isValid) {
         if (confirm("Are you sure you want to use this backup?")) {
           notes = JSON.parse(e.target.result);
-          if (notes[0].url && notes[0].body && notes[0].title &&notes[0].id) {
+          window.notes= notes[0];
+          console.log(notes[0].url && notes[0].body && notes[0].title && notes[0].id);
+          if (!(!notes[0].url && !notes[0].body && !notes[0].title && !notes[0].id)) {
             notes.forEach((note) => {
               const { id,url, body, title } = note;
               let data = {};
@@ -286,14 +293,15 @@ const getBackupFromFile = (e) => {
             showFileInputDiv(false);
             loadNotes();
           }else{
-            notifier("Invalid File",'warn');
+            notifier("Currupted Invalid File",'warn');
           }
         }
       }else{
-        notifier("Invalid File",'warn');
+        notifier("Invalid File 2",'warn');
       }
     };
   }else{
     notifier("Invalid File",'warn');
   }
 };
+})(document);

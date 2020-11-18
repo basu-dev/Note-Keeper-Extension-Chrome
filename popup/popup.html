@@ -13,22 +13,23 @@
     <div class="first-page">
         <h3>Keep Your Note</h3>
         <div>
-        <input placeholder="Subject" autofocus>
-        <textarea placeholder="Write Your Note" note-id=""></textarea>
-        <div class="info">Auto Save is enabled.</div>
+            <input placeholder="Subject" autofocus>
+            <textarea placeholder="Write Your Note" note-id=""></textarea>
+            <div class="info">Auto Save is enabled.</div>
         </div>
         <div class="buttons">
             <button id="open-notes">Open All Notes</button>
         </div>
     </div>
     <div class="second-page">
+        <div class="top-right"><img src="../assets/note.svg" height="20"></div>
         <h3>Notes<small></small><input id="search" placeholder="search"></h3>
         <div class="cards"></div>
         <div class="buttons sec-page-btns">
-            <button id="delete-all"><img src="../assets/delete.svg"> Delete All</button>
+            <button id="delete-all"><object data="../assets/delete.svg" type="image/svg+xml"></object> Delete All</button>
             <button id="backup"><img src="../assets/download.svg"> Backup</button>
-            <button id="second-page-close">New Note</button>
-            <button id="restore"> <img src="../assets/refresh.svg"> Restore</button> 
+            <button id="restore"> <object data="../assets/refresh.svg" type="image/svg+xml"></object> Restore</button> 
+            <button id="second-page-close"><object data="../assets/note.svg" type="image/svg+xml"></object> New Note</button>
         </div>
         <div id="file-input" class="buttons">
             <input type="file" placeholder="Select File"><button id="close-file-input">Cancel</button>
